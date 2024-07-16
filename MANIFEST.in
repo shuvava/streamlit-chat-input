@@ -1,0 +1,3 @@
+recursive-include chat_input_advanced/frontend/build *
+include README.md
+include LICENSE
