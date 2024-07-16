@@ -8,7 +8,7 @@ import streamlit.components.v1 as components
 # the component, and True when we're ready to package and distribute it.
 # (This is, of course, optional - there are innumerable ways to manage your
 # release process.)
-_RELEASE = False
+_RELEASE = True
 
 # Declare a Streamlit component. `declare_component` returns a function
 # that is used to create instances of the component. We're naming this
@@ -60,11 +60,16 @@ def chat_input_avd(placeholder: str = None, on_arrow_key: Callable[[str], None] 
         placeholder = 'Your message'
     component_value = _component_func(placeholder=placeholder, default='')
     if at_bottom:
-        st.markdown("""<style>
-        iframe[title="chat_input_advanced.chat_input_advanced"] {
+        st.markdown(f"""<style>
+        iframe[title="chat_input_advanced.chat_input_advanced"] {{
             position: fixed;
             bottom: 8%;
-        }
+            z-index: 99;
+        }}
+        div[data-testid="stAppViewBlockContainer"] {{
+        max-height: 85%;
+        overflow-y: auto;
+        }}
         </style>
         """, unsafe_allow_html=True)
     if 'arrowKey' in component_value and on_arrow_key is not None:

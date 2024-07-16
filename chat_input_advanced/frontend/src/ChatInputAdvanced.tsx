@@ -1,7 +1,7 @@
 import { Textarea as UITextArea } from "baseui/textarea"
 import {
   Streamlit,
-  StreamlitComponentBase,
+  StreamlitComponentBase, Theme,
   withStreamlitConnection,
 } from "streamlit-component-lib"
 import React, { ChangeEvent, ReactNode, KeyboardEvent, createRef } from "react"
@@ -16,7 +16,7 @@ import { Provider as StyletronProvider } from "styletron-react"
 import { BaseProvider, LightTheme, DarkTheme } from "baseui"
 import { Client as Styletron } from "styletron-engine-monolithic"
 import { ComponentProps } from "streamlit-component-lib/dist/StreamlitReact"
-import { IoSend } from "react-icons/io5";
+import { IoSend } from "react-icons/io5"
 
 interface State {
   isFocused: boolean
@@ -30,6 +30,7 @@ interface State {
 interface PublicState {
   value: string
   arrowKey?: string
+  theme?: Theme
 }
 
 const engine = new Styletron()
@@ -71,6 +72,7 @@ class ChatInputAdvanced extends StreamlitComponentBase<State> {
     maxHeight: 140,
   }
   private readonly chatInputRef: React.MutableRefObject<HTMLTextAreaElement>
+  private timerHandler?: number
 
   constructor(props: ComponentProps<any> | Readonly<ComponentProps<any>>) {
     super(props)
@@ -111,20 +113,20 @@ class ChatInputAdvanced extends StreamlitComponentBase<State> {
     // Streamlit sends us a theme object via props that we can use to ensure
     // that our component has visuals that match the active theme in a
     // streamlit app.
-    const { theme, width, disabled } = this.props;
+    const { theme, width, disabled } = this.props
 
-    const lightTheme = hasLightBackgroundColor(theme);
-    const rootTheme = lightTheme ? LightTheme : DarkTheme;
-    rootTheme.colors.borderSelected  = colors.red60;
+    const lightTheme = hasLightBackgroundColor(theme)
+    const rootTheme = lightTheme ? LightTheme : DarkTheme
+    rootTheme.colors.borderSelected = colors.red60
     const placeholderColor = lightTheme
       ? colors.gray60
-      : colors.gray70;
+      : colors.gray70
 
     // @ts-ignore
     const isInputExtended =
       this.state.scrollHeight > 0 && this.chatInputRef.current
         ? Math.abs(this.state.scrollHeight - this.state.minHeight) > ROUNDING_OFFSET
-        : false;
+        : false
 
     return (
       <>
@@ -196,7 +198,7 @@ class ChatInputAdvanced extends StreamlitComponentBase<State> {
                 ></UITextArea>
                 <StyledSendIconButtonContainer>
                   <StyledSendIconButton
-                    onClick={()=>this.handleSubmit('')}
+                    onClick={() => this.handleSubmit("")}
                     disabled={!this.state.dirty || disabled}
                     data-testid="stChatInputSubmitButton"
                     args={null} width={0} theme={theme}>
@@ -232,8 +234,8 @@ class ChatInputAdvanced extends StreamlitComponentBase<State> {
       arrowKey = key
       shouldSubmit = true
     }
-    if (key === 'Escape') {
-      this.setState({value: ''})
+    if (key === "Escape") {
+      this.setState({ value: "" })
     }
     if (shouldSubmit) {
       e.preventDefault()
@@ -251,8 +253,12 @@ class ChatInputAdvanced extends StreamlitComponentBase<State> {
     if (this.state.value === "" && !arrowKey) {
       return
     }
+    // @ts-ignore
     const compState: PublicState = {
       value: this.state.value,
+    }
+    if (this.props.theme !== undefined) {
+      compState.theme = this.props.theme
     }
     if (arrowKey !== "") {
       compState.arrowKey = arrowKey
@@ -261,7 +267,17 @@ class ChatInputAdvanced extends StreamlitComponentBase<State> {
       _ => ({ value: "", dirty: false }),
       () => Streamlit.setComponentValue(compState),
     )
-    this.setScrollHeight(0)
+    this.setScrollHeight(0);
+    if (this.timerHandler) {
+      window.parent.clearInterval(this.timerHandler);
+    }
+    this.timerHandler = window.parent.setInterval(()=> {
+      const msg = window.parent.document.querySelectorAll("[data-testid=\"stChatMessage\"]");
+      if (msg.length > 0) {
+        msg[msg.length - 1].scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+      }
+      window.parent.clearInterval(this.timerHandler)
+    }, 200)
   }
 
 
