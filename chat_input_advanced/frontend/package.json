@@ -1,6 +1,6 @@
 {
-  "name": "my_component",
-  "version": "0.1.0",
+  "name": "chat_input_avdvanced",
+  "version": "0.1.1",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.5",

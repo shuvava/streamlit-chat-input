@@ -56,7 +56,7 @@ def chat_input_avd(placeholder: str = None, on_arrow_key: Callable[[str], None] 
     """
     if placeholder is None:
         placeholder = ''
-    component_value = _component_func(placeholder=placeholder, key=key, default='')
+    component_value = _component_func(placeholder=placeholder, default='')
     if 'arrowKey' in component_value and on_arrow_key is not None:
         on_arrow_key(component_value['arrowKey'])
     if isinstance(component_value, str):

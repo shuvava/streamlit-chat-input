@@ -24,7 +24,7 @@ build:
 	npm --prefix ./chat_input_advanced/frontend run build
 	python3 -m build
 
-publish: build ## publish component to testpip
+publish: clean build ## publish component to testpip
 	python3 -m twine upload --repository testpypi dist/*
 
 activate: ## activate python virtual environment
