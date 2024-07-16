@@ -119,13 +119,13 @@ export function hasLightBackgroundColor(theme?: Theme): boolean {
   return getLuminance(theme?.backgroundColor as string) > 0.5
 }
 
-export interface StyledChatInputContainerProps {
-  width: number
+export interface StyledChatInputContainerProps extends ComponentProps {
+  className: string
 }
 
-export class StyledChatInputContainer extends StreamlitComponentBase {
+export class StyledChatInputContainer extends React.PureComponent<StyledChatInputContainerProps> {
   public render = (): ReactNode => {
-    const { theme, width, children } = this.props
+    const { theme, width, children, className } = this.props
     const lightTheme = hasLightBackgroundColor(theme)
     const style: React.CSSProperties = {
       display: "flex",
@@ -139,7 +139,7 @@ export class StyledChatInputContainer extends StreamlitComponentBase {
     }
     return (
       <div
-        style={style}>
+        style={style} className={className}>
         {children}
       </div>
     )

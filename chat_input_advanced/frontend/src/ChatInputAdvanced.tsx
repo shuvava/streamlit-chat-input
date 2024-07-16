@@ -199,7 +199,7 @@ class ChatInputAdvanced extends StreamlitComponentBase<State> {
                     onClick={()=>this.handleSubmit('')}
                     disabled={!this.state.dirty || disabled}
                     data-testid="stChatInputSubmitButton"
-                   args={null} width={0} theme={theme}>
+                    args={null} width={0} theme={theme}>
                     <IoSend size="18" color="inherit" />
                   </StyledSendIconButton>
                 </StyledSendIconButtonContainer>
@@ -258,7 +258,7 @@ class ChatInputAdvanced extends StreamlitComponentBase<State> {
       compState.arrowKey = arrowKey
     }
     this.setState(
-      prevState => ({ value: "", dirty: false }),
+      _ => ({ value: "", dirty: false }),
       () => Streamlit.setComponentValue(compState),
     )
     this.setScrollHeight(0)

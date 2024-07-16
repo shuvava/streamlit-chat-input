@@ -29,6 +29,7 @@
         background-color: var(--hover-background-color);
         color: var(--hover-color);
     }
+
     &:disabled, &:disabled:hover, &:disabled:active {
         border-color: transparent;
         background-color: transparent;

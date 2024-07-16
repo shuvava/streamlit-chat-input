@@ -7,7 +7,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setuptools.setup(
     name="streamlit-chat-input-advanced",
-    version="0.0.3",
+    version="0.0.4",
     author="shuvava",
     author_email="john@example.com",
     description="Streamlit component that allows you catch arrow up keyboard event",

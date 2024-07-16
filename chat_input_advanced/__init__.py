@@ -1,5 +1,6 @@
 import os
 from typing import Callable
+import streamlit as st
 
 import streamlit.components.v1 as components
 
@@ -45,18 +46,27 @@ else:
 # `declare_component` and call it done. The wrapper allows us to customize
 # our component's API: we can pre-process its input args, post-process its
 # output value, and add a docstring for users.
-def chat_input_avd(placeholder: str = None, on_arrow_key: Callable[[str], None] = None):
+def chat_input_avd(placeholder: str = None, on_arrow_key: Callable[[str], None] = None, at_bottom: bool = True):
     """Create a new instance of "chat_input_advanced".
 
         :param placeholder: chat input placeholder
         :type placeholder: str
         :param on_arrow_key: callable which will be called when arrow key (Up/Down) is pressed
         :type on_arrow_key: Callable[[str], None]
-
+        :param at_bottom: if True put element at the bottom of the document
+        :type at_bottom: bool
     """
     if placeholder is None:
-        placeholder = ''
+        placeholder = 'Your message'
     component_value = _component_func(placeholder=placeholder, default='')
+    if at_bottom:
+        st.markdown("""<style>
+        iframe[title="chat_input_advanced.chat_input_advanced"] {
+            position: fixed;
+            bottom: 8%;
+        }
+        </style>
+        """, unsafe_allow_html=True)
     if 'arrowKey' in component_value and on_arrow_key is not None:
         on_arrow_key(component_value['arrowKey'])
     if isinstance(component_value, str):

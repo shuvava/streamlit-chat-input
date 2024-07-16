@@ -33,6 +33,9 @@ activate: ## activate python virtual environment
 run: guard-PIPENV_ACTIVE ## runs streamlit application
 	streamlit run example.py
 
+serv: ## run debug version of component
+	npm run start --prefix ./chat_input_advanced/frontend
+
 clean: clean-build clean-pyc ## remove all build and Python artifacts
 
 clean-build:
