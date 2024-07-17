@@ -4,7 +4,7 @@ Streamlit component that allows you catch arrow up keyboard event
 
 it implements ability to 
 * clear textarea when user press Escape
-* notify application that user press arrow key (Up/Down) it allow to implement go to previous message
+* allow go back and forth by message history 
 
 ## Installation instructions
 

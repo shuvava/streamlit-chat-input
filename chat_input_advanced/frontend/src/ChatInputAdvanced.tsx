@@ -24,7 +24,9 @@ interface State {
   dirty: boolean
   scrollHeight: number
   minHeight: number,
-  maxHeight: number
+  maxHeight: number,
+  history: Array<string>,
+  historyIndex: number
 }
 
 interface PublicState {
@@ -47,9 +49,14 @@ const isEnterKeyPressed = (event: KeyboardEvent<HTMLTextAreaElement>): boolean =
   )
 }
 
-const isArrowKeyPressed = (event: KeyboardEvent<HTMLTextAreaElement>): boolean => {
+const isArrowUpPressed = (event: KeyboardEvent<HTMLTextAreaElement>): boolean => {
   const { key } = event
-  return key === "ArrowUp" || key === "ArrowDown"
+  return key === "ArrowUp" // || key === "ArrowDown"
+}
+
+const isArrowDownPressed = (event: KeyboardEvent<HTMLTextAreaElement>): boolean => {
+  const { key } = event
+  return key === "ArrowDown"
 }
 
 
@@ -70,6 +77,8 @@ class ChatInputAdvanced extends StreamlitComponentBase<State> {
     scrollHeight: 0,
     minHeight: 0,
     maxHeight: 140,
+    history: [],
+    historyIndex:0,
   }
   private readonly chatInputRef: React.MutableRefObject<HTMLTextAreaElement>
   private timerHandler?: number
@@ -198,7 +207,7 @@ class ChatInputAdvanced extends StreamlitComponentBase<State> {
                 ></UITextArea>
                 <StyledSendIconButtonContainer>
                   <StyledSendIconButton
-                    onClick={() => this.handleSubmit("")}
+                    onClick={() => this.handleSubmit()}
                     disabled={!this.state.dirty || disabled}
                     data-testid="stChatInputSubmitButton"
                     args={null} width={0} theme={theme}>
@@ -226,31 +235,48 @@ class ChatInputAdvanced extends StreamlitComponentBase<State> {
 
   private handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>): void => {
     const { metaKey, ctrlKey, shiftKey } = e
-    let shouldSubmit =
-      isEnterKeyPressed(e) && !shiftKey && !ctrlKey && !metaKey
-    let arrowKey = undefined
+    let shouldSubmit = isEnterKeyPressed(e) && !shiftKey && !ctrlKey && !metaKey
     const { key } = e
-    if (isArrowKeyPressed(e)) {
-      arrowKey = key
-      shouldSubmit = true
+    if (isArrowUpPressed(e) && !this.state.dirty) {
+      if (this.state.value === '' && this.state.history.length > 0) {
+        const len = this.state.history.length;
+        this.setState({value: this.state.history[len-1], historyIndex: 1});
+      } else if (this.state.historyIndex > 0 &&
+        this.state.historyIndex < this.state.history.length){
+        const len = this.state.history.length;
+        const inx = this.state.historyIndex+1;
+        this.setState(state =>({value: this.state.history[len-inx], historyIndex: state.historyIndex+1}));
+      } else if (this.state.historyIndex === 0 && this.state.history.length > 0 && this.state.value === this.state.history[this.state.history.length-1]) {
+        const len = this.state.history.length;
+        const val = this.state.history[len-1];
+        this.setState({value: val, historyIndex: 1});
+      }
+    } else if (isArrowDownPressed(e) && !this.state.dirty) {
+      if (this.state.value !== '' && this.state.historyIndex > 1) {
+        const len = this.state.history.length;
+        const inx = this.state.historyIndex-1;
+        const val = this.state.history[len-inx];
+        this.setState({value: val, historyIndex: inx});
+      }
     }
+
     if (key === "Escape") {
-      this.setState({ value: "" })
+      this.setState({ value: "", historyIndex: 0, })
     }
     if (shouldSubmit) {
       e.preventDefault()
 
-      this.handleSubmit(arrowKey)
+      this.handleSubmit()
     }
   }
 
-  private handleSubmit = (arrowKey?: string): void => {
+  private handleSubmit = (): void => {
     // We want the chat input to always be in focus
     // even if the user clicks the submit button
     // if (chatInputRef.current) {
     //   chatInputRef.current.focus()
     // }
-    if (this.state.value === "" && !arrowKey) {
+    if (this.state.value === "") {
       return
     }
     // @ts-ignore
@@ -260,19 +286,18 @@ class ChatInputAdvanced extends StreamlitComponentBase<State> {
     if (this.props.theme !== undefined) {
       compState.theme = this.props.theme
     }
-    if (arrowKey !== "") {
-      compState.arrowKey = arrowKey
-    }
+    Streamlit.setComponentValue(compState)
+    this.state.history?.push(compState.value)
     this.setState(
-      _ => ({ value: "", dirty: false }),
-      () => Streamlit.setComponentValue(compState),
+      state => ({ value: "", dirty: false, history: state.history }),
+      // () => Streamlit.setComponentValue(compState),
     )
-    this.setScrollHeight(0);
+    this.setScrollHeight(0)
     if (this.timerHandler) {
-      window.parent.clearInterval(this.timerHandler);
+      window.parent.clearInterval(this.timerHandler)
     }
-    this.timerHandler = window.parent.setInterval(()=> {
-      const msg = window.parent.document.querySelectorAll("[data-testid=\"stChatMessage\"]");
+    this.timerHandler = window.parent.setInterval(() => {
+      const msg = window.parent.document.querySelectorAll("[data-testid=\"stChatMessage\"]")
       if (msg.length > 0) {
         msg[msg.length - 1].scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
       }
