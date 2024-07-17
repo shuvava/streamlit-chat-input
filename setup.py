@@ -9,7 +9,6 @@ setuptools.setup(
     name="streamlit-chat-input-advanced",
     version="0.0.8",
     author="shuvava",
-    author_email="john@example.com",
     description="Streamlit component that allows you catch arrow up keyboard event",
     long_description=long_description,
     long_description_content_type="text/markdown",
