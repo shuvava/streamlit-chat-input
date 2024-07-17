@@ -13,7 +13,7 @@ setuptools.setup(
     description="Streamlit component that allows you catch arrow up keyboard event",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="",
+    url="https://github.com/shuvava/streamlit-chat-input",
     packages=setuptools.find_packages(),
     include_package_data=True,
     classifiers=[],
