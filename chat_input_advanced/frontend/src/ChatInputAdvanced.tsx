@@ -309,16 +309,15 @@ class ChatInputAdvanced extends StreamlitComponentBase<State> {
         const obj = (listObj[0] as any)
         obj.style.maxHeight = "85%"
         obj.style.overflowY = "auto";
-        (window as any).stramlitCustomMessageObserd.observe(obj, { childList: true, subtree: true })
+        (window as any).stramlitCustomMessageObserd.observe(listObj[0], { childList: true, subtree: true })
       }
       // fix style of iframe
-
       const iframes = window.parent.document.querySelectorAll("iframe[title=\"chat_input_advanced.chat_input_advanced\"]")
       if (iframes.length > 0) {
         const iframe = (iframes[0] as any)
         iframe.style.position = "fixed"
         iframe.style.bottom = "8%"
-        iframe.style.zIndex = "99"
+        iframe.style.zIndex = "9999"
       }
     }
   }
