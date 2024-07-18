@@ -53,19 +53,6 @@ def chat_input_avd(placeholder: str = None, at_bottom: bool = True):
     """
     if placeholder is None:
         placeholder = 'Your message'
-    new_value = _component_func(placeholder=placeholder, default={'value': ''})
-    if at_bottom:
-        st.markdown(f"""<style>
-        iframe[title="chat_input_advanced.chat_input_advanced"] {{
-            position: fixed;
-            bottom: 8%;
-            z-index: 99;
-        }}
-        div[data-testid="stAppViewBlockContainer"] {{
-        max-height: 85%;
-        overflow-y: auto;
-        }}
-        </style>
-        """, unsafe_allow_html=True)
+    new_value = _component_func(placeholder=placeholder, default={'value': ''}, at_bottom=at_bottom)
     value = new_value["value"]
     return value

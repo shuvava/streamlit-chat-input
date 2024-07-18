@@ -78,7 +78,7 @@ class ChatInputAdvanced extends StreamlitComponentBase<State> {
     minHeight: 0,
     maxHeight: 140,
     history: [],
-    historyIndex:0,
+    historyIndex: 0,
   }
   private readonly chatInputRef: React.MutableRefObject<HTMLTextAreaElement>
   private timerHandler?: number
@@ -93,51 +93,52 @@ class ChatInputAdvanced extends StreamlitComponentBase<State> {
     let scrollHeight = 0
     const { current: textarea } = this.chatInputRef
     if (textarea) {
-      const placeholder = textarea.placeholder
-      textarea.placeholder = ""
-      textarea.style.height = "auto"
-      scrollHeight = textarea.scrollHeight
-      textarea.placeholder = placeholder
-      textarea.style.height = ""
+      const placeholder = textarea.placeholder;
+      textarea.placeholder = "";
+      textarea.style.height = "auto";
+      scrollHeight = textarea.scrollHeight;
+      textarea.placeholder = placeholder;
+      textarea.style.height = "";
     }
 
     return scrollHeight
   }
 
   private setScrollHeight(h: number) {
-    this.setState({ scrollHeight: h })
+    this.setState({ scrollHeight: h });
   }
 
   public render = (): ReactNode => {
     // Arguments that are passed to the plugin in Python are accessible
     // via `this.props.args`.
-    const placeholder = this.props.args["placeholder"]
-    const maxHeightArg = this.props.args["maxHeight"]
+    const placeholder = this.props.args["placeholder"];
+    const maxHeightArg = this.props.args["maxHeight"];
+    const atBottom = this.props.args["at_bottom"];
     if (maxHeightArg) {
-      this.setState(
-        _ => ({ maxHeight: maxHeightArg }),
-      )
+      this.setState({ maxHeight: maxHeightArg });
     }
 
     // Streamlit sends us a theme object via props that we can use to ensure
     // that our component has visuals that match the active theme in a
     // streamlit app.
-    const { theme, width, disabled } = this.props
+    const { theme, width, disabled } = this.props;
 
-    const lightTheme = hasLightBackgroundColor(theme)
-    const rootTheme = lightTheme ? LightTheme : DarkTheme
-    rootTheme.colors.borderSelected = colors.red60
+    const lightTheme = hasLightBackgroundColor(theme);
+    const rootTheme = lightTheme ? LightTheme : DarkTheme;
+    rootTheme.colors.borderSelected = colors.red60;
     const placeholderColor = lightTheme
       ? colors.gray60
-      : colors.gray70
+      : colors.gray70;
 
     // @ts-ignore
     const isInputExtended =
       this.state.scrollHeight > 0 && this.chatInputRef.current
         ? Math.abs(this.state.scrollHeight - this.state.minHeight) > ROUNDING_OFFSET
-        : false
+        : false;
 
-    this.scrollChat();
+    if (atBottom === true) {
+      this.fixParentDOM();
+    }
 
     return (
       <>
@@ -240,30 +241,30 @@ class ChatInputAdvanced extends StreamlitComponentBase<State> {
     let shouldSubmit = isEnterKeyPressed(e) && !shiftKey && !ctrlKey && !metaKey
     const { key } = e
     if (isArrowUpPressed(e) && !this.state.dirty) {
-      if (this.state.value === '' && this.state.history.length > 0) {
-        const len = this.state.history.length;
-        this.setState({value: this.state.history[len-1], historyIndex: 1});
+      if (this.state.value === "" && this.state.history.length > 0) {
+        const len = this.state.history.length
+        this.setState({ value: this.state.history[len - 1], historyIndex: 1 })
       } else if (this.state.historyIndex > 0 &&
-        this.state.historyIndex < this.state.history.length){
-        const len = this.state.history.length;
-        const inx = this.state.historyIndex+1;
-        this.setState(state =>({value: this.state.history[len-inx], historyIndex: state.historyIndex+1}));
-      } else if (this.state.historyIndex === 0 && this.state.history.length > 0 && this.state.value === this.state.history[this.state.history.length-1]) {
-        const len = this.state.history.length;
-        const val = this.state.history[len-1];
-        this.setState({value: val, historyIndex: 1});
+        this.state.historyIndex < this.state.history.length) {
+        const len = this.state.history.length
+        const inx = this.state.historyIndex + 1
+        this.setState(state => ({ value: this.state.history[len - inx], historyIndex: state.historyIndex + 1 }))
+      } else if (this.state.historyIndex === 0 && this.state.history.length > 0 && this.state.value === this.state.history[this.state.history.length - 1]) {
+        const len = this.state.history.length
+        const val = this.state.history[len - 1]
+        this.setState({ value: val, historyIndex: 1 })
       }
     } else if (isArrowDownPressed(e) && !this.state.dirty) {
-      if (this.state.value !== '' && this.state.historyIndex > 1) {
-        const len = this.state.history.length;
-        const inx = this.state.historyIndex-1;
-        const val = this.state.history[len-inx];
-        this.setState({value: val, historyIndex: inx});
+      if (this.state.value !== "" && this.state.historyIndex > 1) {
+        const len = this.state.history.length
+        const inx = this.state.historyIndex - 1
+        const val = this.state.history[len - inx]
+        this.setState({ value: val, historyIndex: inx })
       }
     }
 
     if (key === "Escape") {
-      this.setState({ value: "", historyIndex: 0, })
+      this.setState({ value: "", historyIndex: 0 })
     }
     if (shouldSubmit) {
       e.preventDefault()
@@ -294,23 +295,47 @@ class ChatInputAdvanced extends StreamlitComponentBase<State> {
       state => ({ value: "", dirty: false, history: state.history }),
       // () => Streamlit.setComponentValue(compState),
     )
-    this.setScrollHeight(0);
-    this.scrollChat();
+    this.setScrollHeight(0)
   }
 
+  fixParentDOM() {
+    const MutationObserver = window.MutationObserver
+    if (MutationObserver && (window as any).stramlitCustomMessageObserd === undefined) {
+      (window as any).stramlitCustomMessageObserd = new MutationObserver(() => this.scrollChat())
+      const listObj = window.parent.document.querySelectorAll("[data-testid=\"stAppViewBlockContainer\"]")
+      // have the observer observe for changes in children
+      console.log(`found objects ${listObj.length}`)
+      if (listObj.length > 0) {
+        const obj = (listObj[0] as any)
+        obj.style.maxHeight = "85%"
+        obj.style.overflowY = "auto";
+        (window as any).stramlitCustomMessageObserd.observe(obj, { childList: true, subtree: true })
+      }
+      // fix style of iframe
+
+      const iframes = window.parent.document.querySelectorAll("iframe[title=\"chat_input_advanced.chat_input_advanced\"]")
+      if (iframes.length > 0) {
+        const iframe = (iframes[0] as any)
+        iframe.style.position = "fixed"
+        iframe.style.bottom = "8%"
+        iframe.style.zIndex = "99"
+      }
+    }
+  }
 
   private scrollChat() {
-    if (this.timerHandler) {
-      window.parent.clearInterval(this.timerHandler)
-    }
-    this.timerHandler = window.parent.setInterval(() => {
-      const msg = window.parent.document.querySelectorAll("[data-testid=\"stVerticalBlock\"]")
-      if (msg.length > 0) {
-        msg[msg.length - 1].scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+    const msg = window.parent.document.querySelectorAll("[data-testid=\"stVerticalBlock\"]")
+    if (msg.length > 0) {
+      let maxItem = msg[0]
+      for (let i = 1; i < msg.length - 1; i++) {
+        if (maxItem.scrollHeight < msg[i].scrollHeight) {
+          maxItem = msg[i]
+        }
       }
-      window.parent.clearInterval(this.timerHandler)
-    }, 200);
+      maxItem.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+    }
   }
+
   private onError = (e: any): void => {
     console.log(`some error happen: ${e}`)
   }
