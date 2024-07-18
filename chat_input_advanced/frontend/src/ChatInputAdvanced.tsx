@@ -137,6 +137,8 @@ class ChatInputAdvanced extends StreamlitComponentBase<State> {
         ? Math.abs(this.state.scrollHeight - this.state.minHeight) > ROUNDING_OFFSET
         : false
 
+    this.scrollChat();
+
     return (
       <>
         <StyletronProvider value={engine}>
@@ -292,7 +294,12 @@ class ChatInputAdvanced extends StreamlitComponentBase<State> {
       state => ({ value: "", dirty: false, history: state.history }),
       // () => Streamlit.setComponentValue(compState),
     )
-    this.setScrollHeight(0)
+    this.setScrollHeight(0);
+    this.scrollChat();
+  }
+
+
+  private scrollChat() {
     if (this.timerHandler) {
       window.parent.clearInterval(this.timerHandler)
     }
@@ -302,10 +309,8 @@ class ChatInputAdvanced extends StreamlitComponentBase<State> {
         msg[msg.length - 1].scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
       }
       window.parent.clearInterval(this.timerHandler)
-    }, 200)
+    }, 200);
   }
-
-
   private onError = (e: any): void => {
     console.log(`some error happen: ${e}`)
   }
