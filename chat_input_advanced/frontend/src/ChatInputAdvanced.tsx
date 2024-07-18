@@ -297,7 +297,7 @@ class ChatInputAdvanced extends StreamlitComponentBase<State> {
       window.parent.clearInterval(this.timerHandler)
     }
     this.timerHandler = window.parent.setInterval(() => {
-      const msg = window.parent.document.querySelectorAll("[data-testid=\"stChatMessage\"]")
+      const msg = window.parent.document.querySelectorAll("[data-testid=\"stVerticalBlock\"]")
       if (msg.length > 0) {
         msg[msg.length - 1].scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
       }
